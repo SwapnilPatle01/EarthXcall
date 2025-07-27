@@ -1,8 +1,54 @@
 import React from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
+import { useState } from "react";
 
 const CSR = () => {
-  // Animation variants
+  const [companyName, setCompanyName] = useState("");
+  const [contactPerson, setContactPerson] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [areaOfInterest, setAreaOfInterest] = useState("");
+  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState(null); 
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); 
+    setStatus(null); 
+
+    if (!companyName || !contactPerson || !email || !phone || !areaOfInterest || !message) {
+       setStatus("error");
+       console.error("Please fill in all fields.");
+       return;
+    }
+
+    try {
+      const response = await axios.post(`${process.env.BACKEND_URL}/csr-inquiry`, { 
+        companyName,
+        contactPerson,
+        email,
+        phone,
+        areaOfInterest,
+        message
+      });
+      
+      if (response.status === 201) { 
+        setStatus("success");
+        setCompanyName("");
+        setContactPerson("");
+        setEmail("");
+        setPhone("");
+        setAreaOfInterest("");
+        setMessage("");
+      } else {
+        setStatus("error");
+      }
+    } catch (error) {
+      console.error("Error submitting CSR inquiry:", error);
+      setStatus("error");
+    }
+  };
+
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
@@ -22,7 +68,6 @@ const CSR = () => {
     }
   };
 
-  // CSR programs data
   const csrPrograms = [
     {
       id: 1,
@@ -54,7 +99,6 @@ const CSR = () => {
     }
   ];
 
-  // CSR benefits data
   const csrBenefits = [
     {
       title: "Enhanced Brand Reputation",
@@ -82,7 +126,6 @@ const CSR = () => {
     }
   ];
 
-  // Partner testimonials
   const testimonials = [
     {
       quote: "Partnering with EarthXcall has been transformative for our sustainability goals. Their transparent approach and measurable impact have made this our most successful CSR initiative to date.",
@@ -100,9 +143,7 @@ const CSR = () => {
 
   return (
     <div className="bg-white">
-      {/* Hero Section */}
       <section className="relative h-[100vh] flex items-center justify-center overflow-hidden">
-        {/* Background Image with Overlay */}
         <div 
           className="absolute inset-0 bg-cover bg-center z-0"
           style={{
@@ -111,8 +152,6 @@ const CSR = () => {
         >
           <div className="absolute inset-0 bg-gradient-to-r from-green-900/80 to-emerald-800/80 backdrop-blur-xs"></div>
         </div>
-
-        {/* Content */}
         <div className="container mx-auto px-6 relative z-10 text-center">
           <motion.h1 
             className="text-5xl md:text-6xl font-bold text-white mb-6"
@@ -146,7 +185,6 @@ const CSR = () => {
         </div>
       </section>
 
-      {/* Why Choose Us Section */}
       <section className="py-20 bg-gradient-to-b from-green-50 to-white">
         <div className="container mx-auto px-6">
           <motion.div 
@@ -161,7 +199,6 @@ const CSR = () => {
               We offer comprehensive CSR solutions that align with your company's values and sustainability objectives
             </p>
           </motion.div>
-
           <motion.div 
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
             variants={staggerContainer}
@@ -183,7 +220,6 @@ const CSR = () => {
         </div>
       </section>
 
-      {/* Our CSR Programs */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
           <motion.div 
@@ -198,7 +234,6 @@ const CSR = () => {
               Choose from our range of impactful environmental and social initiatives
             </p>
           </motion.div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {csrPrograms.map((program) => (
               <motion.div 
@@ -228,7 +263,6 @@ const CSR = () => {
         </div>
       </section>
 
-      {/* Impact Metrics */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-6">
           <motion.div 
@@ -243,7 +277,6 @@ const CSR = () => {
               We provide transparent reporting and quantifiable results for all our CSR partnerships
             </p>
           </motion.div>
-
           <motion.div 
             className="grid grid-cols-1 md:grid-cols-3 gap-8"
             variants={staggerContainer}
@@ -276,7 +309,6 @@ const CSR = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
           <motion.div 
@@ -291,7 +323,6 @@ const CSR = () => {
               Hear from organizations that have partnered with us
             </p>
           </motion.div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {testimonials.map((testimonial, index) => (
               <motion.div 
@@ -317,7 +348,6 @@ const CSR = () => {
         </div>
       </section>
 
-      {/* Contact Form */}
       <section id="contact" className="py-20 bg-gradient-to-b from-green-800 to-green-900 text-white">
         <div className="container mx-auto px-6">
           <motion.div 
@@ -332,7 +362,6 @@ const CSR = () => {
               Fill out the form below and our team will get in touch to discuss partnership opportunities
             </p>
           </motion.div>
-
           <motion.div 
             className="max-w-3xl mx-auto bg-white/10 backdrop-blur-md p-10 rounded-xl shadow-lg"
             initial="hidden"
@@ -340,64 +369,99 @@ const CSR = () => {
             viewport={{ once: true }}
             variants={fadeIn}
           >
-            <form className="space-y-6">
+            {status === 'success' && (
+              <div className="mb-4 p-4 bg-green-100 text-green-800 rounded-lg">
+                Thank you! Your inquiry has been submitted successfully. We will contact you soon.
+              </div>
+            )}
+            {status === 'error' && (
+              <div className="mb-4 p-4 bg-red-100 text-red-800 rounded-lg">
+                There was an error submitting your inquiry. Please check your details and try again.
+              </div>
+            )}
+
+            <form className="space-y-6" onSubmit={handleSubmit}> 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-gray-200 mb-2">Company Name</label>
+                  <label htmlFor="companyName" className="block text-gray-200 mb-2">Company Name</label> 
                   <input 
                     type="text" 
+                    id="companyName" 
                     className="w-full px-4 py-3 bg-white/20 border border-gray-300/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-white"
                     placeholder="Your company"
+                    value={companyName} 
+                    onChange={(e) => setCompanyName(e.target.value)} 
+                    required
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-200 mb-2">Contact Person</label>
+                  <label htmlFor="contactPerson" className="block text-gray-200 mb-2">Contact Person</label>
                   <input 
                     type="text" 
+                    id="contactPerson"
                     className="w-full px-4 py-3 bg-white/20 border border-gray-300/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-white"
                     placeholder="Full name"
+                    value={contactPerson}
+                    onChange={(e) => setContactPerson(e.target.value)}
+                    required
                   />
                 </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-gray-200 mb-2">Email Address</label>
+                  <label htmlFor="email" className="block text-gray-200 mb-2">Email Address</label>
                   <input 
                     type="email" 
+                    id="email"
                     className="w-full px-4 py-3 bg-white/20 border border-gray-300/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-white"
                     placeholder="email@company.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-200 mb-2">Phone Number</label>
+                  <label htmlFor="phone" className="block text-gray-200 mb-2">Phone Number</label>
                   <input 
                     type="tel" 
+                    id="phone"
                     className="w-full px-4 py-3 bg-white/20 border border-gray-300/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-white"
                     placeholder="Your phone"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    required
                   />
                 </div>
               </div>
               
               <div>
-                <label className="block text-gray-200 mb-2">Areas of Interest</label>
+                <label htmlFor="areaOfInterest" className="block text-gray-200 mb-2">Areas of Interest</label>
                 <select 
+                  id="areaOfInterest"
                   className="w-full px-4 py-3 bg-white/20 border border-gray-300/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-white"
+                  value={areaOfInterest}
+                  onChange={(e) => setAreaOfInterest(e.target.value)}
+                  required
                 >
-                  <option className="bg-green-800">Select an option</option>
-                  <option className="bg-green-800">Reforestation Initiative</option>
-                  <option className="bg-green-800">Clean Water Projects</option>
-                  <option className="bg-green-800">Renewable Energy Access</option>
-                  <option className="bg-green-800">Sustainable Agriculture</option>
-                  <option className="bg-green-800">Multiple Areas</option>
+                  <option value="" className="bg-green-800">Select an option</option>
+                  <option value="Reforestation Initiative" className="bg-green-800">Reforestation Initiative</option>
+                  <option value="Clean Water Projects" className="bg-green-800">Clean Water Projects</option>
+                  <option value="Renewable Energy Access" className="bg-green-800">Renewable Energy Access</option>
+                  <option value="Sustainable Agriculture" className="bg-green-800">Sustainable Agriculture</option>
+                  <option value="Multiple Areas" className="bg-green-800">Multiple Areas</option>
                 </select>
               </div>
               
               <div>
-                <label className="block text-gray-200 mb-2">Message</label>
+                <label htmlFor="message" className="block text-gray-200 mb-2">Message</label>
                 <textarea 
+                  id="message"
                   className="w-full px-4 py-3 bg-white/20 border border-gray-300/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-white h-32"
                   placeholder="Tell us about your CSR goals and how we can help"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  required
                 ></textarea>
               </div>
               
@@ -405,6 +469,7 @@ const CSR = () => {
                 <button 
                   type="submit" 
                   className="w-full px-6 py-4 bg-white text-green-800 font-semibold rounded-lg hover:bg-gray-100 transition duration-300 shadow-lg"
+                    disabled={status === 'success'} 
                 >
                   Submit Inquiry
                 </button>
@@ -414,7 +479,6 @@ const CSR = () => {
         </div>
       </section>
 
-      {/* FAQ Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
           <motion.div 
@@ -429,7 +493,6 @@ const CSR = () => {
               Common questions about our CSR partnerships
             </p>
           </motion.div>
-
           <motion.div 
             className="max-w-4xl mx-auto space-y-6"
             variants={staggerContainer}
@@ -441,17 +504,14 @@ const CSR = () => {
               <h3 className="text-xl font-semibold text-gray-800 mb-2">What is the minimum contribution for CSR partnerships?</h3>
               <p className="text-gray-600">We work with organizations of all sizes and can customize partnerships based on your budget. Our starting contributions typically begin at ₹50,000, but we're flexible and can discuss options that align with your company's capacity.</p>
             </motion.div>
-            
             <motion.div variants={fadeIn} className="border-b border-gray-200 pb-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-2">How do you measure and report impact?</h3>
               <p className="text-gray-600">We provide detailed quarterly reports with quantifiable metrics specific to your chosen initiative. These include environmental impact data, beneficiary statistics, and progress photos/videos. We also offer site visits for partners to witness the impact firsthand.</p>
             </motion.div>
-            
             <motion.div variants={fadeIn} className="border-b border-gray-200 pb-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Can we customize a CSR program for our company?</h3>
               <p className="text-gray-600">Absolutely! We specialize in creating tailored CSR programs that align with your company's values, industry, and specific sustainability goals. Our team will work closely with you to develop a program that maximizes impact while meeting your objectives.</p>
             </motion.div>
-            
             <motion.div variants={fadeIn} className="border-b border-gray-200 pb-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Do you provide tax benefits documentation?</h3>
               <p className="text-gray-600">Yes, as a registered non-profit organization, we provide all necessary documentation for tax deductions. Our finance team ensures you receive proper receipts and certificates for your contributions in compliance with tax regulations.</p>
