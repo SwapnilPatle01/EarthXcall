@@ -12,6 +12,7 @@
   "dependencies": {
     "@react-google-maps/api": "^2.20.6",
     "@tailwindcss/vite": "^4.0.7",
+    "axios": "^1.11.0",
     "firebase": "^11.10.0",
     "framer-motion": "^12.4.5",
     "leaflet": "^1.9.4",

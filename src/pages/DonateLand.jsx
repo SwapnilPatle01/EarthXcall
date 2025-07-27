@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 const DonateLand = () => {
-  // Animation variants
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
@@ -11,7 +11,6 @@ const DonateLand = () => {
       transition: { duration: 0.6 }
     }
   };
-
   const slideIn = {
     hidden: { opacity: 0, x: -30 },
     visible: { 
@@ -20,8 +19,7 @@ const DonateLand = () => {
       transition: { duration: 0.6 }
     }
   };
-
-  // Form state
+  
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -32,7 +30,8 @@ const DonateLand = () => {
     message: ""
   });
 
-  // Land type options
+  const [status, setStatus] = useState(null);
+
   const landTypes = [
     "Agricultural Land",
     "Forest Land",
@@ -41,8 +40,7 @@ const DonateLand = () => {
     "Coastal Area",
     "Other"
   ];
-
-  // Benefits of donating land
+  
   const benefits = [
     {
       title: "Environmental Conservation",
@@ -65,8 +63,7 @@ const DonateLand = () => {
       icon: "💰"
     }
   ];
-
-  // Success stories
+  
   const successStories = [
     {
       title: "The Sharma Family Forest Reserve",
@@ -84,8 +81,7 @@ const DonateLand = () => {
       image: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?q=80&w=2070&auto=format&fit=crop"
     }
   ];
-
-  // Handle form input changes
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevState => ({
@@ -93,20 +89,44 @@ const DonateLand = () => {
       [name]: value
     }));
   };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // *** PREVENT DEFAULT FORM SUBMISSION ***
+    setStatus(null); // Reset status on new submit
 
-  // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Form submission logic would go here
-    console.log("Form submitted:", formData);
-    alert("Thank you for your interest in donating land. Our team will contact you soon.");
+    if (!formData.name || !formData.email || !formData.phone || !formData.landLocation || !formData.landSize || !formData.landType) {
+       setStatus("error");
+       // You could set a more specific error message here if desired
+       console.error("Please fill in all required fields.");
+       return;
+    }
+
+    try {
+      const response = await axios.post(`${process.env.BACKEND_URL}/land-donation`, formData); // Use formData directly
+      
+      if (response.status === 201) { 
+        setStatus("success");
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          landLocation: "",
+          landSize: "",
+          landType: "",
+          message: ""
+        });
+      } else {
+        setStatus("error");
+      }
+    } catch (error) {
+      console.error("Error submitting Land Donation inquiry:", error);
+      setStatus("error");
+    }
   };
 
   return (
     <div className="bg-white">
-      {/* Hero Section */}
       <section className="relative h-[100vh] flex items-center justify-center overflow-hidden">
-        {/* Background Image with Overlay */}
         <div 
           className="absolute inset-0 bg-cover bg-center z-0"
           style={{
@@ -115,8 +135,6 @@ const DonateLand = () => {
         >
           <div className="absolute inset-0 bg-gradient-to-r from-green-900/70 to-green-800/70 backdrop-blur-sm"></div>
         </div>
-
-        {/* Content */}
         <div className="container mx-auto px-6 relative z-10 text-center">
           <motion.h1 
             className="text-5xl md:text-6xl font-bold text-white mb-6"
@@ -148,9 +166,7 @@ const DonateLand = () => {
             </a>
           </motion.div>
         </div>
-      </section>
-
-      {/* Introduction Section */}
+      </section>  
       <section className="py-20 bg-gradient-to-b from-green-50 to-white">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center gap-12">
@@ -191,8 +207,6 @@ const DonateLand = () => {
           </div>
         </div>
       </section>
-
-      {/* Benefits Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
           <motion.div 
@@ -207,7 +221,6 @@ const DonateLand = () => {
               When you donate your land, you receive multiple benefits while contributing to environmental conservation
             </p>
           </motion.div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {benefits.map((benefit, index) => (
               <motion.div 
@@ -226,8 +239,6 @@ const DonateLand = () => {
           </div>
         </div>
       </section>
-
-      {/* Success Stories */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-6">
           <motion.div 
@@ -242,7 +253,6 @@ const DonateLand = () => {
               See how donated lands have been transformed into thriving conservation areas
             </p>
           </motion.div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {successStories.map((story, index) => (
               <motion.div 
@@ -269,8 +279,6 @@ const DonateLand = () => {
           </div>
         </div>
       </section>
-
-      {/* Contact Form Section */}
       <section id="contact-form" className="py-20 bg-gradient-to-b from-green-800 to-green-900 text-white">
         <div className="container mx-auto px-6">
           <motion.div 
@@ -285,7 +293,6 @@ const DonateLand = () => {
               Fill out the form below to start the land donation process. Our team will contact you to discuss the next steps.
             </p>
           </motion.div>
-
           <motion.div 
             className="max-w-4xl mx-auto bg-white/10 backdrop-blur-md p-10 rounded-xl shadow-lg"
             initial="hidden"
@@ -293,12 +300,25 @@ const DonateLand = () => {
             viewport={{ once: true }}
             variants={fadeIn}
           >
-            <form className="space-y-6" onSubmit={handleSubmit}>
+            {/* *** STATUS FEEDBACK *** */}
+            {status === 'success' && (
+              <div className="mb-4 p-4 bg-green-100 text-green-800 rounded-lg">
+                Thank you! Your land donation inquiry has been submitted successfully. We will contact you soon.
+              </div>
+            )}
+            {status === 'error' && (
+              <div className="mb-4 p-4 bg-red-100 text-red-800 rounded-lg">
+                There was an error submitting your inquiry. Please check your details and try again.
+              </div>
+            )}
+
+            <form className="space-y-6" onSubmit={handleSubmit}> {/* *** ON SUBMIT HANDLER *** */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-gray-200 mb-2">Full Name*</label>
+                  <label htmlFor="name" className="block text-gray-200 mb-2">Full Name*</label> {/* Added htmlFor */}
                   <input 
                     type="text" 
+                    id="name" 
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
@@ -308,9 +328,10 @@ const DonateLand = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-200 mb-2">Email Address*</label>
+                  <label htmlFor="email" className="block text-gray-200 mb-2">Email Address*</label>
                   <input 
                     type="email" 
+                    id="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
@@ -320,11 +341,11 @@ const DonateLand = () => {
                   />
                 </div>
               </div>
-              
               <div>
-                <label className="block text-gray-200 mb-2">Phone Number*</label>
+                <label htmlFor="phone" className="block text-gray-200 mb-2">Phone Number*</label>
                 <input 
                   type="tel" 
+                  id="phone"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
@@ -333,11 +354,11 @@ const DonateLand = () => {
                   required
                 />
               </div>
-              
               <div>
-                <label className="block text-gray-200 mb-2">Land Location*</label>
+                <label htmlFor="landLocation" className="block text-gray-200 mb-2">Land Location*</label>
                 <input 
                   type="text" 
+                  id="landLocation"
                   name="landLocation"
                   value={formData.landLocation}
                   onChange={handleChange}
@@ -346,12 +367,12 @@ const DonateLand = () => {
                   required
                 />
               </div>
-              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-gray-200 mb-2">Land Size (acres/hectares)*</label>
+                  <label htmlFor="landSize" className="block text-gray-200 mb-2">Land Size (acres/hectares)*</label>
                   <input 
                     type="text" 
+                    id="landSize"
                     name="landSize"
                     value={formData.landSize}
                     onChange={handleChange}
@@ -361,8 +382,9 @@ const DonateLand = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-200 mb-2">Land Type*</label>
+                  <label htmlFor="landType" className="block text-gray-200 mb-2">Land Type*</label>
                   <select 
+                    id="landType"
                     name="landType"
                     value={formData.landType}
                     onChange={handleChange}
@@ -376,10 +398,10 @@ const DonateLand = () => {
                   </select>
                 </div>
               </div>
-              
               <div>
-                <label className="block text-gray-200 mb-2">Additional Information</label>
+                <label htmlFor="message" className="block text-gray-200 mb-2">Additional Information</label>
                 <textarea 
+                  id="message"
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
@@ -387,11 +409,11 @@ const DonateLand = () => {
                   placeholder="Please provide any additional details about your land, its current use, and your donation intentions."
                 ></textarea>
               </div>
-              
               <div className="pt-4">
                 <button 
                   type="submit" 
                   className="w-full px-6 py-4 bg-white text-green-800 font-semibold rounded-lg hover:bg-gray-100 transition duration-300 shadow-lg"
+                  disabled={status === 'success'} // Optional: Disable button after success
                 >
                   Submit Land Donation Inquiry
                 </button>
@@ -400,8 +422,6 @@ const DonateLand = () => {
           </motion.div>
         </div>
       </section>
-
-      {/* FAQ Section */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
           <motion.div 
@@ -416,7 +436,6 @@ const DonateLand = () => {
               Common questions about the land donation process
             </p>
           </motion.div>
-
           <motion.div 
             className="max-w-4xl mx-auto space-y-6"
             initial="hidden"
@@ -428,17 +447,14 @@ const DonateLand = () => {
               <h3 className="text-xl font-semibold text-gray-800 mb-2">What types of land do you accept?</h3>
               <p className="text-gray-600">We accept various types of land including agricultural land, forest areas, wetlands, coastal properties, and urban plots. Each donation is evaluated based on its conservation potential and alignment with our mission.</p>
             </div>
-            
             <div className="border-b border-gray-200 pb-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-2">What is the process for donating land?</h3>
               <p className="text-gray-600">The process begins with submitting the inquiry form. Our team will then contact you to discuss your property, arrange a site visit, and conduct necessary assessments. If both parties agree to proceed, we'll work with legal experts to complete the donation paperwork.</p>
             </div>
-            
             <div className="border-b border-gray-200 pb-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-2">What tax benefits will I receive?</h3>
               <p className="text-gray-600">Land donations typically qualify for significant tax deductions based on the fair market value of the property. The exact benefits depend on your specific situation, and we recommend consulting with a tax professional for personalized advice.</p>
             </div>
-            
             <div className="border-b border-gray-200 pb-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Can I specify how my land will be used?</h3>
               <p className="text-gray-600">Yes, we work with donors to understand their wishes for the land. While we focus on conservation and environmental projects, we can discuss specific uses that align with both your vision and our organization's mission.</p>
@@ -446,8 +462,6 @@ const DonateLand = () => {
           </motion.div>
         </div>
       </section>
-
-      {/* Call to Action */}
       <section className="py-16 bg-green-100">
         <div className="container mx-auto px-6 text-center">
           <motion.h2 
@@ -487,4 +501,4 @@ const DonateLand = () => {
   );
 };
 
-export default DonateLand; 
+export default DonateLand;  
