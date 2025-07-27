@@ -23,7 +23,7 @@ const CSR = () => {
     }
 
     try {
-      const response = await axios.post(`${process.env.BACKEND_URL}/csr-inquiry`, { 
+      const response = await axios.post(`https://earthxway-backend.vercel.app/csr-inquiry`, { 
         companyName,
         contactPerson,
         email,

@@ -102,7 +102,7 @@ const DonateLand = () => {
     }
 
     try {
-      const response = await axios.post(`${process.env.BACKEND_URL}/land-donation`, formData); // Use formData directly
+      const response = await axios.post(`https://earthxway-backend.vercel.app/land-donation`, formData); // Use formData directly
       
       if (response.status === 201) { 
         setStatus("success");

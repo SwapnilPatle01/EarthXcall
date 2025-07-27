@@ -15,7 +15,7 @@ export default function Footer() {
     }
 
     try {
-      await axios.post(`${process.env.BACKEND_URL}/newsletter`, { email, firstName }); 
+      await axios.post(`https://earthxway-backend.vercel.app/newsletter`, { email, firstName }); 
       setStatus("success");
       setFirstName("");
       setEmail("");
